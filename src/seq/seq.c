@@ -21,7 +21,7 @@ int main() {
 
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
 
-    // Write duration to log file
+    // Write number of nodes & duration to log file
     fprintf(log_file, "Number of nodes: %d\n", node_count);
     fprintf(log_file, "Duration: %f seconds\n", duration);
 

@@ -84,12 +84,15 @@ int main() {
         sublist[i]->prev = last;
     }
  
+    // TODO: Sort merged list
+
+
     // End time
     clock_t total_end = clock();
 
     double total_duration = (double)(total_end - total_start) / CLOCKS_PER_SEC;
 
-    // Write duration to log file
+    // Write number of nodes & duration to log file
     fprintf(log_file, "Number of nodes: %d\n", node_count);
     fprintf(log_file, "Duration: %f seconds\n", total_duration);
 
