@@ -3,7 +3,7 @@
 Node* Reserve() {
     Node* node = (Node*)malloc(sizeof(Node));
     if (node) {
-        node->data = 0;
+        node->data = RandZ(20);
         node->next = NULL;
         node->prev = NULL;
     }

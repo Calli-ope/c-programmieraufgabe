@@ -1,3 +1,4 @@
+#include "../utils/rand.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -3,8 +3,8 @@ TARGET = seq
 
 all: $(TARGET)
 
-$(TARGET): seq.o ../com/com.o
-	$(CC) -o $(TARGET) seq.o ../com/com.o
+$(TARGET): seq.o ../com/com.o ../utils/rand.o
+	$(CC) -o $(TARGET) seq.o ../com/com.o ../utils/rand.o
 
 seq.o : seq.c seq.h
 	$(CC) -c seq.c
@@ -12,8 +12,11 @@ seq.o : seq.c seq.h
 ../com/com.o :
 	$(MAKE) -C ../com com.o
 
+../../utils/rand.o :
+	$(CC) -c ../utils/rand.c -o ../utils/rand.o
+
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f *.o $(TARGET)
+	del -f *.o $(TARGET).exe

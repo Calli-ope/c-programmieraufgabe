@@ -1,14 +1,20 @@
 #include "seq.h"
 #include <time.h>
 
-int main() {
+int main() {    
+    // Initialize random number generator
+    RandZ_Init();
+
     // Define number of nodes
-    int node_count = 10000;
+    int node_count = 1000;
 
     FILE* log_file = fopen(LOG_FILE, "w");
 
     // Generate list
     Node* list = Gen(node_count);
+    
+    // Output list
+    ListOut(list, 0, 1000);
     
     // Start time
     clock_t start = clock();
@@ -26,6 +32,9 @@ int main() {
     fprintf(log_file, "Duration: %f seconds\n", duration);
 
     fclose(log_file);
+
+    // Output list
+    ListOut(list, 0, 1000);
 
     // Free list
     ListFree(list);

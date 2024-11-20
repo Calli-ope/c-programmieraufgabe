@@ -27,6 +27,9 @@ void ThrdFunc(void* arg) {
 }
 
 int main() {
+    // Initialize random number generator
+    RandZ_Init();
+    
     // Define number of nodes
     int node_count = 10000;
 
