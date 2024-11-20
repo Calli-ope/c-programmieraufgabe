@@ -3,10 +3,14 @@
 Vergleich sequenzieller und paralleler Sortierung der großen Datenmengen
 
 ## Usage
+
+`cd src` \
+`make all`
+
 ### sequentielles Programm
-`cd src/srq` \
+`cd srq` \
 `make run`
 
 ### paralleles Programm
-`cd src/par` \
+`cd par` \
 `make run`
