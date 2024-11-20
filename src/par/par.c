@@ -66,7 +66,7 @@ int main() {
     for (int i = 0; i < NUM_THREADS; i++) {
         thread_data[i].head = sublist[i];
         thread_data[i].thread_num = i + 1;
-        pthread_create(&threads[i], NULL, ThrdFunc, &thread_data[i]);
+        pthread_create(&threads[i], NULL, (void*)ThrdFunc, &thread_data[i]);
     }
 
     // Join threads
