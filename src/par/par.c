@@ -27,9 +27,6 @@ void ThrdFunc(void* arg) {
 }
 
 int main() {
-    // Initialize random number generator
-    RandZ_Init();
-    
     // Define number of nodes
     int node_count = 10000;
 
@@ -37,6 +34,9 @@ int main() {
     Node* list = Gen(node_count);
     Node** sublist = malloc(sizeof(Node*) * NUM_THREADS);
     int sublist_length = node_count / NUM_THREADS;
+
+    // Output list
+    ListOut(list, 0, 1000);
 
     // Split list
     Node* current = list;
@@ -89,6 +89,8 @@ int main() {
  
     // TODO: Sort merged list
 
+    // Output list
+    ListOut(list, 0, 1000);
 
     // End time
     clock_t total_end = clock();
