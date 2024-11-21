@@ -3,7 +3,7 @@
 
 int main() {
     // Define number of nodes
-    int node_count = 1000000;
+    int node_count = 50000000;
 
     FILE* log_file = fopen(LOG_FILE, "w");
 
@@ -11,13 +11,13 @@ int main() {
     Node* list = Gen(node_count);
     
     // Output list
-    ListOut(list, 0, 1000000);
+    // ListOut(list, 0, node_count);
     
     // Start time
     clock_t start = clock();
 
     // Sort list
-    Sort(list);
+    Sort(&list);
 
     // End time
     clock_t end = clock();
@@ -31,7 +31,7 @@ int main() {
     fclose(log_file);
 
     // Output list
-    ListOut(list, 0, 1000000);
+    // ListOut(list, 0, node_count);
 
     // Free list
     ListFree(list);

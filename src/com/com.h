@@ -14,6 +14,6 @@ typedef struct Node {
 // Declarations
 Node* Gen(int anzahl);
 Node* Reserve();
-void Sort(Node* head);
+void Sort(Node** headRef);
 void ListOut(Node* head, int von, int bis);
 void ListFree(Node* head);

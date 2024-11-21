@@ -13,7 +13,7 @@ void ThrdFunc(void* arg) {
     ThreadData* thread_data = (ThreadData*)arg;
     clock_t start = clock();
 
-    Sort(thread_data->head);
+    Sort(&thread_data->head);
 
     clock_t end = clock();
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
