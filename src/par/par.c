@@ -13,13 +13,19 @@ void ThrdFunc(void* arg) {
     ThreadData* thread_data = (ThreadData*)arg;
     clock_t start = clock();
 
+    printf("Thread %d vor Sort\n", thread_data->thread_num);
+    ListOut(thread_data->head, 0, 100);
+
     Sort(&thread_data->head);
+
+    printf("Thread %d nach Sort\n", thread_data->thread_num);
+    ListOut(thread_data->head, 0, 100);
 
     clock_t end = clock();
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
 
     pthread_mutex_lock(&mutex);
-    fprintf(log_file, "Number of nodes: %d\n", thread_data->thread_num);
+    fprintf(log_file, "Number of Thread: %d\n", thread_data->thread_num);
     fprintf(log_file, "Duration: %f seconds\n", duration);
     pthread_mutex_unlock(&mutex);
 
@@ -28,42 +34,46 @@ void ThrdFunc(void* arg) {
 
 int main() {
     // Define number of nodes
-    int node_count = 10000;
+    int node_count = 20;
 
     // Generate list
     Node* list = Gen(node_count);
     Node** sublist = malloc(sizeof(Node*) * NUM_THREADS);
-    int sublist_length = node_count / NUM_THREADS;
 
     // Output list
-    ListOut(list, 0, 1000);
+    printf("Unsorted list:\n");
+    ListOut(list, 0, node_count);
+
+    // Start time
+    clock_t total_start = clock();
 
     // Split list
     Node* current = list;
+    int remaining = node_count;
+
     for (int i = 0; i < NUM_THREADS; i++) {
         sublist[i] = current;
-        for (int j = 0; j < sublist_length - 1; j++) {
+        int current_sublist_length = remaining / (NUM_THREADS - i);
+        for (int j = 0; j < current_sublist_length - 1; j++) {
             if (current) {
                 current = current->next;
             }
         }
         if (current) {
             Node* next = current->next;
+            current->next = NULL;
             if (next) {
                 next->prev = NULL;
             }
-            current->next = NULL;
             current = next;
         }
+        remaining -= current_sublist_length;
     }
 
     pthread_t threads[NUM_THREADS];
     ThreadData thread_data[NUM_THREADS];
 
     log_file = fopen(LOG_FILE, "w");
-    
-    // Start time
-    clock_t total_start = clock();
 
     // Create threads
     for (int i = 0; i < NUM_THREADS; i++) {
@@ -78,19 +88,50 @@ int main() {
     }
 
     // Merge lists
+    Node* merged_list = thread_data[0].head;
+
     for (int i = 1; i < NUM_THREADS; i++) {
-        Node* last = sublist[i - 1];
-        while (last->next) {
-            last = last->next;
+        Node* l1 = merged_list;
+        Node* l2 = thread_data[i].head;
+
+        Node dummy;
+        Node* tail = &dummy;
+        dummy.next = NULL;
+
+        // Merge l1 and l2
+        while (l1&&l2) {
+            if (l1->data <= l2->data) {
+                tail->next = l1;
+                l1->prev = tail;
+                l1 = l1->next;
+            } else {
+                tail->next = l2;
+                l2->prev = tail;
+                l2 = l2->next;
+            }
+            tail = tail->next;
         }
-        last->next = sublist[i];
-        sublist[i]->prev = last;
+
+        // Append remaining nodes
+        if (l1) {
+            tail->next = l1;
+            l1->prev = tail;
+        } else if (l2) {
+            tail->next = l2;
+            l2->prev = tail;
+        }
+
+        // Update merged list
+        merged_list = dummy.next;
+        if (merged_list) {
+            merged_list->prev = NULL;
+        }
     }
- 
-    // TODO: Sort merged list
+    list = merged_list;
 
     // Output list
-    ListOut(list, 0, 1000);
+    printf("Sorted list:\n");
+    ListOut(list, 0, node_count);
 
     // End time
     clock_t total_end = clock();
