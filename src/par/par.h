@@ -4,4 +4,4 @@
 // Name of log-file
 #define LOG_FILE "par.log"
 // Number of threads
-#define NUM_THREADS 4
+#define NUM_THREADS 8

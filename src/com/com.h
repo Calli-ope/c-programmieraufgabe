@@ -9,7 +9,7 @@ typedef struct Node {
 } Node;
 
 // Global variables
-
+#define NUM_NODES 800
 
 // Declarations
 Node* Gen(int anzahl);
