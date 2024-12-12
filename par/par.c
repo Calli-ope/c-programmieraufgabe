@@ -1,5 +1,4 @@
 #include "par.h"
-#include <time.h>
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 FILE* log_file;
@@ -11,54 +10,64 @@ typedef struct {
 
 void ThrdFunc(void* arg) {
     ThreadData* data = (ThreadData*)arg;
-    clock_t start_time = clock();
+    double duration = 0.;
+    clock_t start, end = 0;
 
-    /*printf("Thread %d vor Sort\n", data->thread_id);
-    ListOut(data->sublist_head, 0, NUM_NODES);*/
+    start = clock();
 
-    // Sort sublist
+    // Subliste sortieren
     Sort(&data->sublist_head);
 
-    printf("Thread %d nach Sort\n", data->thread_id);
-    ListOut(data->sublist_head, 0, NUM_NODES);
+    end = clock();
 
-    clock_t end_time = clock();
-    double duration = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    duration = (double)(end - start) / CLOCKS_PER_SEC;
+
+    /*printf("\nThread %d nach Sort\n", data->thread_id);
+    ListOut(data->sublist_head, 0, NUM_NODES);*/
 
     pthread_mutex_lock(&mutex);
-    fprintf(log_file, "Number of Thread: %d\n", data->thread_id);
-    fprintf(log_file, "Duration: %f seconds\n", duration);
+    fprintf(log_file, "Nummer des Threads: %d\n", data->thread_id);
+    fprintf(log_file, "Dauer der Thread-Sortierung: %f Sekunden\n", duration);
     pthread_mutex_unlock(&mutex);
 
     pthread_exit(NULL);
 }
 
 int main() {
-    // Generate list
+    // Liste generieren
     Node* list = Gen(NUM_NODES);
     Node** sublists = malloc(sizeof(Node*) * NUM_THREADS);
+
+    // Zum aufteilen der Liste
+    Node* current = NULL;
+    int remaining_nodes = NUM_NODES;
+
+    log_file = fopen(LOG_FILE, "w");
+
+    pthread_t threads[NUM_THREADS];
+    ThreadData thread_data[NUM_THREADS];
+
+    double duration = 0.;
+    clock_t start, end = 0;
 
     // Output list
     /*printf("Unsorted list:\n");
     ListOut(list, 0, NUM_NODES);*/
 
-    // Start time
-    clock_t total_start = clock();
+    start = clock();
 
-    // Split list
-    Node* current = list;
-    int remaining_nodes = NUM_NODES;
-
+    // Liste aufteilen
+    current = list;
     for (int i = 0; i < NUM_THREADS; i++) {
         sublists[i] = current;
         int nodes_per_thread = remaining_nodes / (NUM_THREADS - i);
 
-        // Find end of current sublist
+        // Ende der Subliste finden
         for (int j = 1; j < nodes_per_thread && current != NULL; j++) {
-                current = current->next;
+            current = current->next;
         }
 
-        // Disconnect sublist
+        // Subliste trennen
         if (current != NULL) {
             Node* next = current->next;
             current->next = NULL;
@@ -70,35 +79,30 @@ int main() {
         remaining_nodes -= nodes_per_thread;
     }
 
-    pthread_t threads[NUM_THREADS];
-    ThreadData thread_data[NUM_THREADS];
-
-    log_file = fopen(LOG_FILE, "w");
-
-    // Create threads
+    // Threads erstellen
     for (int i = 0; i < NUM_THREADS; i++) {
         thread_data[i].sublist_head = sublists[i];
         thread_data[i].thread_id = i + 1;
         pthread_create(&threads[i], NULL, ThrdFunc, &thread_data[i]);
     }
 
-    // Wait for threads to complete and join them
+    // Threads zusammenführen
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
 
-    // Merge sorted sublists
-    Node* merged_list = thread_data[0].sublist_head;
+    // Sortierte Listen zusammenführen
+    list = thread_data[0].sublist_head;
 
     for (int i = 1; i < NUM_THREADS; i++) {
-        Node* list1 = merged_list;
+        Node* list1 = list;
         Node* list2 = thread_data[i].sublist_head;
 
         Node dummy;
         Node* tail = &dummy;
         dummy.next = NULL;
 
-        // Merge list1 and list2
+        // list1 und list2 zusammenführen
         while (list1&&list2) {
             if (list1->data <= list2->data) {
                 tail->next = list1;
@@ -112,7 +116,7 @@ int main() {
             tail = tail->next;
         }
 
-        // Append remaining nodes
+        // Restliche Knoten anhängen
         if (list1) {
             tail->next = list1;
             list1->prev = tail;
@@ -121,31 +125,25 @@ int main() {
             list2->prev = tail;
         }
 
-        // Update head of merged list
-        merged_list = dummy.next;
-        if (merged_list) {
-            merged_list->prev = NULL;
+        // Liste aktualisieren
+        list = dummy.next;
+        if (list) {
+            list->prev = NULL;
         }
     }
 
-    // Update main list to point to merged list
-    list = merged_list;
+    end = clock();
+    duration = (double)(end - start) / CLOCKS_PER_SEC;
 
-    // Output list
-    printf("Sorted list:\n");
-    ListOut(list, 0, NUM_NODES);
+    // Liste Ausgeben
+    /*printf("Sortierte Liste:\n");
+    ListOut(list, 0, NUM_NODES); */
 
-    // End time
-    clock_t total_end = clock();
-    double total_duration = (double)(total_end - total_start) / CLOCKS_PER_SEC;
-
-    // Write number of nodes & duration to log file
-    fprintf(log_file, "Number of nodes: %d\n", NUM_NODES);
-    fprintf(log_file, "Duration: %f seconds\n", total_duration);
+    // Ausgabe in Log-Datei
+    fprintf(log_file, "Anzahl der Knoten: %d\n", NUM_NODES);
+    fprintf(log_file, "Dauer der Gesamt-Sortierung: %f Sekunden\n", duration);
 
     fclose(log_file);
-
-    // Free list
     ListFree(list);
     free(sublists);
 

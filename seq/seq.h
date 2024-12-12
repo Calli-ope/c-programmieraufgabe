@@ -1,3 +1,4 @@
+#include <time.h>
 #include "../com/com.h"
 
 // Name of log-file

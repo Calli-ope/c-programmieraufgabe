@@ -3,13 +3,12 @@
 all:
 	@echo "Building all components..."
 	make -C ./com
-	make -C ./utils
-	make -C ./seq
 	make -C ./par
+
+run: all
+	make -C ./par run
 
 clean:
 	@echo "Cleaning all components..."
-	make -C ./seq clean
-	make -C ./par clean
 	make -C ./com clean
-	make -C ./utils clean
+	make -C ./par clean
