@@ -35,7 +35,7 @@ void Sort(Node** headRef) {
     int max = 0;
     Node* node = head;
 
-    // Find the maximum number to know the number of digits
+    // Finde das Maximum
     while (node) {
         if (node->data > max) {
             max = node->data;
@@ -43,17 +43,17 @@ void Sort(Node** headRef) {
         node = node->next;
     }
 
-    // Do counting sort for every digit
+    // Sortierung
     for (int exp = 1; max / exp > 0; exp *= 10) {
-        // Initialize buckets
+        // Buckets initialisieren
         Node* buckets[10] = {NULL};
         Node* tails[10] = {NULL};
 
-        // Distribute nodes into buckets
+        // Verteilung
         node = head;
         while (node) {
-            Node* nextNode = node->next; // Save the next node
-            node->next = NULL; // Disconnect the node
+            Node* nextNode = node->next;
+            node->next = NULL;
 
             int index = (node->data / exp) % 10;
             if (buckets[index] == NULL) {
@@ -65,7 +65,7 @@ void Sort(Node** headRef) {
             node = nextNode;
         }
 
-        // Concatenate buckets
+        // Bucket zusammenfügen
         head = NULL;
         Node* last = NULL;
         for (int i = 0; i < 10; i++) {
@@ -87,6 +87,14 @@ void ListOut(Node* head, int von, int bis) {
     Node* node = head;
     int i = 0;
 
+    // Parameter überprüfen, ob sie innerhalb des gültigen Bereichs liegen
+    if (von < 1 || bis < 1 || von > NUM_NODES || bis > NUM_NODES) {
+        // Wenn nicht, dann den gesamten Bereich ausgeben
+        von = 1;
+        bis = NUM_NODES;
+    }
+
+    // Liste ausgeben
     while (node) {
         if (i >= von && i <= bis) {
             printf("%d ", node->data);

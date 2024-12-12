@@ -8,10 +8,10 @@ typedef struct Node {
     struct Node *prev;
 } Node;
 
-// Global variables
-#define NUM_NODES 1000000
+// Anzahl der Knoten, die generiert und sortiert werden sollen
+#define NUM_NODES 10000000
 
-// Declarations
+// Deklarationen
 Node* Gen(int anzahl);
 Node* Reserve();
 void Sort(Node** headRef);

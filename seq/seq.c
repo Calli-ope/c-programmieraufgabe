@@ -1,15 +1,17 @@
 #include "seq.h"
 
-int main() {
-    // Liste generieren
-    Node* list = Gen(NUM_NODES);
+int main() {    
     FILE* log_file = fopen(LOG_FILE, "w");
-
+    
     double duration = 0.;
     clock_t start, end = 0;
     
-    // Output list
-    // ListOut(list, 0, NUM_NODES);
+    // Liste generieren
+    Node* list = Gen(NUM_NODES);
+    
+    // Liste vor Sortierung ausgeben
+    //printf("Unsortierte Liste:\n");
+    //ListOut(list, 0, NUM_NODES);
     
     start = clock();
 
@@ -17,7 +19,6 @@ int main() {
     Sort(&list);
 
     end = clock();
-    
     duration = (double)(end - start) / CLOCKS_PER_SEC;
 
     // Ausgabe in Log-Datei
@@ -26,8 +27,9 @@ int main() {
 
     fclose(log_file);
 
-    // Liste ausgeben
-    // ListOut(list, 0, NUM_NODES);
+    // Liste nach Sortierung ausgeben
+    //printf("Sortierte Liste:\n");
+    //ListOut(list, 0, NUM_NODES);
 
     ListFree(list);
 

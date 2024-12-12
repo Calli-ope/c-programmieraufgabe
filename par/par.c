@@ -1,32 +1,31 @@
 #include "par.h"
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-FILE* log_file;
+FILE* log_file = NULL;
 
 typedef struct {
     Node* sublist_head;
     int thread_id;
 } ThreadData;
 
-void ThrdFunc(void* arg) {
+void* ThrdFunc(void* arg) {
     ThreadData* data = (ThreadData*)arg;
+    
     double duration = 0.;
     clock_t start, end = 0;
-
     start = clock();
 
     // Subliste sortieren
     Sort(&data->sublist_head);
 
     end = clock();
-
     duration = (double)(end - start) / CLOCKS_PER_SEC;
 
-    /*printf("\nThread %d nach Sort\n", data->thread_id);
-    ListOut(data->sublist_head, 0, NUM_NODES);*/
+    //printf("\nThread %d nach Sort\n", data->thread_id);
+    //ListOut(data->sublist_head, 0, NUM_NODES);
 
     pthread_mutex_lock(&mutex);
-    fprintf(log_file, "Nummer des Threads: %d\n", data->thread_id);
+    fprintf(log_file, "ID des Threads: %d\n", data->thread_id);
     fprintf(log_file, "Dauer der Thread-Sortierung: %f Sekunden\n", duration);
     pthread_mutex_unlock(&mutex);
 
@@ -34,29 +33,28 @@ void ThrdFunc(void* arg) {
 }
 
 int main() {
-    // Liste generieren
-    Node* list = Gen(NUM_NODES);
-    Node** sublists = malloc(sizeof(Node*) * NUM_THREADS);
-
-    // Zum aufteilen der Liste
+    log_file = fopen(LOG_FILE, "w");
+    
     Node* current = NULL;
     int remaining_nodes = NUM_NODES;
-
-    log_file = fopen(LOG_FILE, "w");
-
     pthread_t threads[NUM_THREADS];
     ThreadData thread_data[NUM_THREADS];
 
     double duration = 0.;
     clock_t start, end = 0;
+    
+    // Liste generieren
+    Node* list = Gen(NUM_NODES);
+    Node** sublists = malloc(sizeof(Node*) * NUM_THREADS);
 
-    // Output list
-    /*printf("Unsorted list:\n");
-    ListOut(list, 0, NUM_NODES);*/
+
+    // Liste vor Sortierung ausgeben
+    //printf("Unsortierte Liste:\n");
+    //ListOut(list, 0, NUM_NODES);
 
     start = clock();
 
-    // Liste aufteilen
+    // Liste in Sublisten aufteilen
     current = list;
     for (int i = 0; i < NUM_THREADS; i++) {
         sublists[i] = current;
@@ -67,7 +65,7 @@ int main() {
             current = current->next;
         }
 
-        // Subliste trennen
+        // Sublisten trennen
         if (current != NULL) {
             Node* next = current->next;
             current->next = NULL;
@@ -79,7 +77,7 @@ int main() {
         remaining_nodes -= nodes_per_thread;
     }
 
-    // Threads erstellen
+    // Threads erstellen 
     for (int i = 0; i < NUM_THREADS; i++) {
         thread_data[i].sublist_head = sublists[i];
         thread_data[i].thread_id = i + 1;
@@ -91,7 +89,7 @@ int main() {
         pthread_join(threads[i], NULL);
     }
 
-    // Sortierte Listen zusammenführen
+    // Sublisten zu gemeinsamer Liste zusammenführen
     list = thread_data[0].sublist_head;
 
     for (int i = 1; i < NUM_THREADS; i++) {
@@ -102,7 +100,6 @@ int main() {
         Node* tail = &dummy;
         dummy.next = NULL;
 
-        // list1 und list2 zusammenführen
         while (list1&&list2) {
             if (list1->data <= list2->data) {
                 tail->next = list1;
@@ -116,7 +113,7 @@ int main() {
             tail = tail->next;
         }
 
-        // Restliche Knoten anhängen
+        // Rest anhängen
         if (list1) {
             tail->next = list1;
             list1->prev = tail;
@@ -125,7 +122,6 @@ int main() {
             list2->prev = tail;
         }
 
-        // Liste aktualisieren
         list = dummy.next;
         if (list) {
             list->prev = NULL;
@@ -135,12 +131,12 @@ int main() {
     end = clock();
     duration = (double)(end - start) / CLOCKS_PER_SEC;
 
-    // Liste Ausgeben
-    /*printf("Sortierte Liste:\n");
-    ListOut(list, 0, NUM_NODES); */
+    // Liste nach dem Sortieren ausgeben
+    //printf("Sortierte Liste:\n");
+    //ListOut(list, 0, NUM_NODES);
 
     // Ausgabe in Log-Datei
-    fprintf(log_file, "Anzahl der Knoten: %d\n", NUM_NODES);
+    fprintf(log_file, "\nAnzahl der Knoten: %d\n", NUM_NODES);
     fprintf(log_file, "Dauer der Gesamt-Sortierung: %f Sekunden\n", duration);
 
     fclose(log_file);
